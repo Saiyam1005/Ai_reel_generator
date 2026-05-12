@@ -10,8 +10,11 @@
 <section class="upload-section">
     <div class="container">
         <div class="upload-container">
-            <h1 class="upload-title">Create Your Reel</h1>
-            <p class="upload-instructions">Upload your video files to create an amazing reel. You can upload multiple files.</p>
+            <div class="upload-header">
+                <span class="eyebrow"><i class="bi bi-cloud-check-fill me-2"></i>Cloud upload</span>
+                <h1 class="upload-title">Create Your Reel</h1>
+                <p class="upload-instructions">Upload your clips and narration prompt. Media is sent directly to ImageKit.</p>
+            </div>
             
             <form action="/create" enctype="multipart/form-data" method="post" class="dropzone" id="myDropzone">
                 <div class="fallback">
@@ -19,18 +22,19 @@
                         <div class="file-input-group">
                             <input name="file1" type="file" class="file-input" />
                             <input type="hidden" name="uuid" value="{{ myid }}" />
-                            <button type="button" class="remove-file-btn" onclick="removeFileInput(this)" disabled>×</button>
+                            <button type="button" class="remove-file-btn" onclick="removeFileInput(this)" disabled><i class="bi bi-dash-lg"></i></button>
                         </div>
                     </div>
-                    <button type="button" class="add-file-btn" onclick="addFileInput()">+ Add File</button>
+                    <button type="button" class="add-file-btn" onclick="addFileInput()"><i class="bi bi-plus-lg me-2"></i>Add File</button>
                 </div>
                 
                 <div class="text-input-container">
-                    <textarea class="text-input" id="textInput" name="text" placeholder="Enter your text to be added as voice here..." rows="4"></textarea>
+                    <label class="input-label" for="textInput">Narration</label>
+                    <textarea class="text-input" id="textInput" name="text" placeholder="Enter the text to turn into voice narration..." rows="4"></textarea>
                 </div>
                 
                 <button type="submit" class="submit-btn" id="submitBtn">
-                    Create Reel
+                    <i class="bi bi-stars me-2"></i>Create Reel
                 </button>
             </form>
         </div>
@@ -48,7 +52,7 @@
         newFileInput.className = 'file-input-group';
         newFileInput.innerHTML = `
             <input name="file${fileCounter}" type="file" class="file-input" />
-            <button type="button" class="remove-file-btn" onclick="removeFileInput(this)">×</button>
+            <button type="button" class="remove-file-btn" onclick="removeFileInput(this)"><i class="bi bi-dash-lg"></i></button>
         `;
         fileInputs.appendChild(newFileInput);
         fileCounter++;

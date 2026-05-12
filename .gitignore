@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+data/
+runtime/
+user_upload/
+static/reel/
+done.txt

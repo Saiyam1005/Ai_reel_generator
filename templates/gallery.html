@@ -8,11 +8,73 @@
 
 {% block content %}
 <div class="container gallery-container">
-    <h1 class="gallery-title">Reel Gallery</h1>
+    <div class="section-heading text-center">
+        <span class="eyebrow">Published output</span>
+        <h1 class="gallery-title">Reel Gallery</h1>
+        <p class="gallery-subtitle">Every reel listed here is pulled from the cloud-backed manifest.</p>
+    </div>
     <div class="gallery-grid">
-        <!-- Example reels - these would be populated dynamically in a real application -->
         {% for reel in reels %}
-        <video src="/static/reel/{{reel}}" controls></video>
+        <article class="reel-card gallery-card" data-reel-url="{{ reel.url }}" data-reel-folder="{{ reel.folder }}">
+            <video src="{{ reel.url }}" controls></video>
+            <div class="reel-card-footer">
+                <div>
+                    <h3>{{ reel.folder }}</h3>
+                    <p>{{ reel.source|title }} stored reel</p>
+
+        <script>
+        (() => {
+            const grid = document.querySelector('.gallery-grid');
+            if (!grid) return;
+
+            const createEmptyState = () => {
+                const empty = document.createElement('div');
+                empty.className = 'empty-state gallery-empty';
+                empty.innerHTML = `
+                    <i class="bi bi-collection-play empty-icon"></i>
+                    <h3>No reels generated yet.</h3>
+                    <p>Once you upload files, the finished reels will appear here automatically.</p>
+                `;
+                return empty;
+            };
+
+            const syncReels = async () => {
+                try {
+                    const response = await fetch('/api/reels', { cache: 'no-store' });
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+                    const activeUrls = new Set((data.reels || []).map((reel) => reel.url));
+
+                    grid.querySelectorAll('.reel-card').forEach((card) => {
+                        const reelUrl = card.dataset.reelUrl;
+                        if (!activeUrls.has(reelUrl)) {
+                            card.remove();
+                        }
+                    });
+
+                    if (!grid.querySelector('.reel-card') && !grid.querySelector('.empty-state')) {
+                        grid.appendChild(createEmptyState());
+                    }
+                } catch (error) {
+                    return;
+                }
+            };
+
+            syncReels();
+            window.setInterval(syncReels, 30000);
+        })();
+        </script>
+                </div>
+                <span class="reel-badge"><i class="bi bi-cloud-check me-1"></i>{{ reel.source|title }}</span>
+            </div>
+        </article>
+        {% else %}
+        <div class="empty-state gallery-empty">
+            <i class="bi bi-collection-play empty-icon"></i>
+            <h3>No reels generated yet.</h3>
+            <p>Once you upload files, the finished reels will appear here automatically.</p>
+        </div>
         {% endfor %}
     </div>
 </div>

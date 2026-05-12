@@ -4,10 +4,44 @@
 
 {% block content %}
 <section class="hero-section">
-    <div class="container">
-        <h1 class="hero-title">Create Amazing Instagram Reels with AI</h1>
-        <p class="hero-subtitle">Transform your videos into engaging reels with our AI-powered platform</p>
-        <a href="/create" class="cta-button">Start Creating Now</a>
+    <div class="container hero-layout">
+        <div class="hero-copy">
+            <span class="eyebrow"><i class="bi bi-cloud-arrow-up-fill me-2"></i>ImageKit cloud workflow</span>
+            <h1 class="hero-title">Create cinematic reels without local storage.</h1>
+            <p class="hero-subtitle">Upload clips, add narration, and publish reels directly from the cloud.</p>
+            <div class="hero-actions">
+                <a href="/create" class="cta-button primary"><i class="bi bi-plus-lg me-2"></i>Start Creating</a>
+                <a href="/gallery" class="cta-button secondary"><i class="bi bi-play-circle me-2"></i>View Gallery</a>
+            </div>
+            <div class="hero-metrics">
+                <div class="metric-card">
+                    <strong>Cloud-only</strong>
+                    <span>ImageKit handles media</span>
+                </div>
+                <div class="metric-card">
+                    <strong>Auto render</strong>
+                    <span>Background generation loop</span>
+                </div>
+                <div class="metric-card">
+                    <strong>Mobile-ready</strong>
+                    <span>Vertical reel output</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-panel">
+            <div class="panel-shell">
+                <div class="panel-topline">
+                    <span class="status-dot"></span>
+                    Live cloud pipeline
+                </div>
+                <h2>What happens after upload?</h2>
+                <ul class="pipeline-list">
+                    <li><i class="bi bi-check2-circle"></i> Files go straight to ImageKit</li>
+                    <li><i class="bi bi-check2-circle"></i> Narration is rendered in the worker</li>
+                    <li><i class="bi bi-check2-circle"></i> Final reel is published back to ImageKit</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -16,21 +50,21 @@
         <div class="row g-4">
             <div class="col-md-4">
                 <div class="feature-card">
-                    <i class="fas fa-magic feature-icon"></i>
+                    <i class="bi bi-magic feature-icon"></i>
                     <h3>AI-Powered Editing</h3>
                     <p>Let our AI analyze and enhance your videos automatically</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="feature-card">
-                    <i class="fas fa-film feature-icon"></i>
+                    <i class="bi bi-film feature-icon"></i>
                     <h3>Smart Stitching</h3>
                     <p>Seamlessly combine multiple clips into perfect reels</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="feature-card">
-                    <i class="fas fa-music feature-icon"></i>
+                    <i class="bi bi-music-note-beamed feature-icon"></i>
                     <h3>Music Integration</h3>
                     <p>Add trending music and sound effects to your reels</p>
                 </div>
@@ -41,13 +75,77 @@
 
 <section class="showcase-section">
     <div class="container">
-        <h2 class="showcase-title">Featured Creations</h2>
+        <div class="section-heading">
+            <span class="eyebrow">Latest output</span>
+            <h2 class="showcase-title">Featured Creations</h2>
+        </div>
         <div class="video-grid">
         {% for reel in reels %}
-        <video src="/static/reel/{{reel}}" controls></video>
+        <article class="reel-card" data-reel-url="{{ reel.url }}" data-reel-folder="{{ reel.folder }}">
+            <video src="{{ reel.url }}" controls></video>
+            <div class="reel-card-footer">
+                <div>
+                    <h3>{{ reel.folder }}</h3>
+                    <p>{{ reel.source|title }} published reel</p>
+                </div>
+                <span class="reel-badge"><i class="bi bi-play-fill me-1"></i>Watch</span>
+            </div>
+        </article>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-collection-play empty-icon"></i>
+            <h3>No reels generated yet.</h3>
+            <p>Upload your first set of clips to publish a cloud-hosted reel.</p>
+            <a href="/create" class="cta-button primary">Create your first reel</a>
+        </div>
         {% endfor %}
         </div>
     </div>
 </section>
+
+<script>
+(() => {
+    const grid = document.querySelector('.video-grid');
+    if (!grid) return;
+
+    const createEmptyState = () => {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = `
+            <i class="bi bi-collection-play empty-icon"></i>
+            <h3>No reels generated yet.</h3>
+            <p>Upload your first set of clips to publish a cloud-hosted reel.</p>
+            <a href="/create" class="cta-button primary">Create your first reel</a>
+        `;
+        return empty;
+    };
+
+    const syncReels = async () => {
+        try {
+            const response = await fetch('/api/reels', { cache: 'no-store' });
+            if (!response.ok) return;
+
+            const data = await response.json();
+            const activeUrls = new Set((data.reels || []).map((reel) => reel.url));
+
+            grid.querySelectorAll('.reel-card').forEach((card) => {
+                const reelUrl = card.dataset.reelUrl;
+                if (!activeUrls.has(reelUrl)) {
+                    card.remove();
+                }
+            });
+
+            if (!grid.querySelector('.reel-card') && !grid.querySelector('.empty-state')) {
+                grid.appendChild(createEmptyState());
+            }
+        } catch (error) {
+            return;
+        }
+    };
+
+    syncReels();
+    window.setInterval(syncReels, 30000);
+})();
+</script>
 {% endblock %}
  
